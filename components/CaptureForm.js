@@ -1,69 +1,86 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import axios from "axios";
 
 export default function CaptureForm() {
-  const { register, handleSubmit, reset } = useForm();
-  const [token, setToken] = useState("");
+  const { register, handleSubmit } = useForm();
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("authToken");
-    if (savedToken) setToken(savedToken);
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
   }, []);
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(
-        "https://your-api-endpoint.com/create-task",
-        {
-          title: data.title,
-          description: data.description,
-          tags: data.tags.split(","),
-          budget_from: Number(data.budget_from),
-          budget_to: Number(data.budget_to),
-          deadline_days: Number(data.deadline_days),
-          number_of_reminders: Number(data.number_of_reminders),
-          private_content: data.private_content || null,
-          is_hard: data.is_hard === "true",
-          all_auto_responses: data.all_auto_responses === "true",
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const response = await axios.post("/api/create-task", data);
       if (response.status === 200) {
-        alert("Задача успешно опубликована!");
-        reset();
+        alert("Задача опубликована!");
       } else {
-        throw new Error("Ошибка публикации");
+        alert("Ошибка при публикации.");
       }
     } catch (error) {
-      alert(`Ошибка: ${error.response?.data?.message || error.message}`);
+      alert("Ошибка: " + error.message);
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Создание задачи</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <input {...register("title")} placeholder="Заголовок" className="w-full p-2 border rounded" required />
-        <textarea {...register("description")} placeholder="Описание" className="w-full p-2 border rounded" required />
-        <input {...register("tags")} placeholder="Теги (через запятую)" className="w-full p-2 border rounded" required />
-        <input type="number" {...register("budget_from")} placeholder="Бюджет от" className="w-full p-2 border rounded" required />
-        <input type="number" {...register("budget_to")} placeholder="Бюджет до" className="w-full p-2 border rounded" required />
-        <input type="number" {...register("deadline_days")} placeholder="Дедлайн (дни)" className="w-full p-2 border rounded" required />
-        <input type="number" {...register("number_of_reminders")} placeholder="Кол-во напоминаний" className="w-full p-2 border rounded" required />
-        <select {...register("is_hard")} className="w-full p-2 border rounded">
-          <option value="true">Сложная</option>
-          <option value="false">Обычная</option>
-        </select>
-        <select {...register("all_auto_responses")} className="w-full p-2 border rounded">
-          <option value="true">Автоответы вкл.</option>
-          <option value="false">Автоответы выкл.</option>
-        </select>
-        <textarea {...register("private_content")} placeholder="Приватное содержимое (опционально)" className="w-full p-2 border rounded" />
-        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-xl font-bold mb-4">Создание задачи</h2>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Заголовок</label>
+          <input {...register("title")} type="text" className="w-full border rounded p-2" required />
+        </div>
+
+        <div className="flex flex-col md:col-span-2">
+          <label className="text-sm font-medium">Описание</label>
+          <textarea {...register("description")} className="w-full border rounded p-2" required></textarea>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Теги (через запятую)</label>
+          <input {...register("tags")} type="text" className="w-full border rounded p-2" />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Бюджет от</label>
+          <input {...register("budget_from")} type="number" className="w-full border rounded p-2" required />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Бюджет до</label>
+          <input {...register("budget_to")} type="number" className="w-full border rounded p-2" required />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Дедлайн (дни)</label>
+          <input {...register("deadline_days")} type="number" className="w-full border rounded p-2" required />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Кол-во напоминаний</label>
+          <input {...register("number_of_reminders")} type="number" className="w-full border rounded p-2" />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Сложная</label>
+          <select {...register("is_hard")} className="w-full border rounded p-2">
+            <option value={true}>Да</option>
+            <option value={false}>Нет</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium">Автоответы</label>
+          <select {...register("all_auto_responses")} className="w-full border rounded p-2">
+            <option value={true}>Включены</option>
+            <option value={false}>Отключены</option>
+          </select>
+        </div>
+
+        <button type="submit" className="md:col-span-2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
           Опубликовать задачу
         </button>
       </form>
