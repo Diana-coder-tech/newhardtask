@@ -1,0 +1,21 @@
+{
+  "name": "newhardtask",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Diana Zhiliakova",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind": "^4.0.0",
+    "vercel": "^41.0.2"
+  }
+}
